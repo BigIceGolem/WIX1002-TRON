@@ -1,18 +1,24 @@
-package game;
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package com.game.player;
 
+/**
+ *
+ * @author User
+ */
 public class Tron extends Character {
-
-    public Tron() {
-        this.name = "Tron";
-        // Initial stats will eventually be overwritten by File I/O
+    
+    
+public Tron(double speed, double handling, int lives, int discs, int xp) {
+        super("Tron", speed, handling, lives, discs, xp);
     }
 
-    
-    protected void applySpecificStats() {
-        // Requirement: Tron gains more speed and stability per level
-        this.speed += 1.5; 
-        this.handling += 0.5; // Stability represented by handling
-        
-        System.out.println("Tron leveled up! Speed increased significantly.");
+  
+
+    @Override
+    public void levelUp() {
+      this.speed += 5;  // Tron specific logic
     }
 }
