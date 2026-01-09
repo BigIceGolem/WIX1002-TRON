@@ -1,8 +1,13 @@
+import java.util.ArrayList; // Added for Disc storage
+import java.util.List;
+
 public class BasicMechanic {
     private int currentRow;
     private int currentCol;
     private double health;
     private String currentDir = "";
+    private String name; // Added: To identify owner
+    private List<Disc> inventory = new ArrayList<>(); // Added: To store ammo
     
     // Constants
     private final int DEFAULT_ROW = 20;
@@ -15,7 +20,9 @@ public class BasicMechanic {
         this.health = DEFAULT_HEALTH;
     }
 
-    public BasicMechanic(int startRow, int startCol, double startHealth) {
+    // Modified Constructor to accept Name
+    public BasicMechanic(String name, int startRow, int startCol, double startHealth) {
+        this.name = name;
         this.currentRow = startRow;
         this.currentCol = startCol;
         setHealth(startHealth);
@@ -75,5 +82,31 @@ public class BasicMechanic {
     public void setHealth(double h) {
         if (h < 0) throw new IllegalArgumentException("Invalid health");
         this.health = h;
+    }
+    // ==========================================================
+    // NEW METHODS ADDED FOR COLLISION MANAGER COMPATIBILITY
+    // ==========================================================
+
+    // 1. Alias methods (Your code calls X/Y, friend uses Col/Row)
+    public int getX() { return currentCol; } 
+    public int getY() { return currentRow; }
+    
+    // 2. Identification (CollisionManager needs to know who owns the disc)
+    public String getName() { return name; }
+
+    // 3. Stop Movement (Called when hitting walls)
+    public void stopMovement() {
+        this.currentDir = ""; // Stops the auto-move loop
+    }
+
+    // 4. Kill switch (Called for holes)
+    public void setLives(double amount) {
+        this.health = amount;
+    }
+
+    // 5. Ammo Handling (Called when picking up disc)
+    public void addDisc(Disc d) {
+        inventory.add(d);
+        // Optional: System.out.println("Disc Reloaded!");
     }
 }
