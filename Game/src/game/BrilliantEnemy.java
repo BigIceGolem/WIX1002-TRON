@@ -1,12 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
-/**
- *
- * @author USER
- */
+package game;
 
 import java.awt.Point;
 import java.util.List;
@@ -39,19 +31,13 @@ public class BrilliantEnemy extends EnemyBot {
             int ty = y + dy[i];
             int score = 0;
 
-            if (!isValid(tx, ty, map)) continue; // Skip walls
+            if (!isValid(tx, ty, map)) continue; 
 
-            // --- SCORING CRITERIA ---
+            // --- SCORING ---
+            // Note: Map methods take (row, col) which is (ty, tx)
+            if (map.isSpeedRamp(ty, tx)) score += 50;
+            if (map.isDisk(ty, tx)) score += (diskAmmo == 0) ? 40 : 10;
 
-            // A. Speed Ramps (High Priority)
-            if (map.isSpeedRamp(tx, ty)) score += 50;
-
-            // B. Disks (Medium Priority - especially if low ammo)
-            if (map.isDisk(tx, ty)) {
-                score += (diskAmmo == 0) ? 40 : 10;
-            }
-
-            // C. Distance to Player (Low Priority - we want to be unpredictable)
             double dist = playerPos.distance(tx, ty);
             score -= (int)dist; 
 

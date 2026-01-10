@@ -1,12 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
-/**
- *
- * @author USER
- */
+package game;
 
 import java.awt.Point;
 import java.util.List;
@@ -18,7 +10,7 @@ public class ModerateEnemy extends EnemyBot {
     @Override
     public String makeMove(Map map, Point playerPos, List<EnemyBot> allBots) {
         
-        // 1. Attack Check: If we can shoot, DO IT.
+        // 1. Attack Check
         if (canShoot(playerPos)) {
             if (playerPos.y < y) return "THROW_UP";
             if (playerPos.y > y) return "THROW_DOWN";
@@ -26,8 +18,7 @@ public class ModerateEnemy extends EnemyBot {
             if (playerPos.x > x) return "THROW_RIGHT";
         }
 
-        // 2. Movement Logic: Chase the player
-        // We only pick moves that are Valid AND have at least 1 open neighbor (not a dead end)
+        // 2. Chase the player
         String bestMove = "WAIT";
         double minDst = 9999;
         
@@ -40,7 +31,6 @@ public class ModerateEnemy extends EnemyBot {
             int ty = y + dy[i];
 
             if (isValid(tx, ty, map)) {
-                // Calculate distance to player
                 double d = playerPos.distance(tx, ty);
                 if (d < minDst) {
                     minDst = d;
@@ -51,4 +41,3 @@ public class ModerateEnemy extends EnemyBot {
         return bestMove;
     }
 }
-

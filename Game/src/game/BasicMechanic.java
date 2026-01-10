@@ -1,112 +1,84 @@
-import java.util.ArrayList; // Added for Disc storage
-import java.util.List;
+package game;
 
-public class BasicMechanic {
-    private int currentRow;
-    private int currentCol;
-    private double health;
-    private String currentDir = "";
-    private String name; // Added: To identify owner
-    private List<Disc> inventory = new ArrayList<>(); // Added: To store ammo
+public class BasicMechanic extends Character {
     
-    // Constants
-    private final int DEFAULT_ROW = 20;
-    private final int DEFAULT_COL = 20;
-    private final double DEFAULT_HEALTH = 3.0;
+    // Grid Position
+    private int row;
+    private int col;
+    private String currentDir = ""; // "w", "a", "s", "d"
 
     public BasicMechanic() {
-        this.currentRow = DEFAULT_ROW;
-        this.currentCol = DEFAULT_COL;
-        this.health = DEFAULT_HEALTH;
+        // Set starting position (Center of map roughly)
+        this.row = 20;
+        this.col = 20;
+        
+        // Default health for the GUI to display
+        this.lives = 100; 
+        this.name = "Player";
     }
 
-    // Modified Constructor to accept Name
-    public BasicMechanic(String name, int startRow, int startCol, double startHealth) {
-        this.name = name;
-        this.currentRow = startRow;
-        this.currentCol = startCol;
-        setHealth(startHealth);
+    // --- MOVEMENT METHODS (Fixes the Red Lines) ---
+
+    public void setDirection(String d) {
+        // Prevent 180-degree turns (optional, but good for Tron)
+        if (this.currentDir.equals("w") && d.equals("s")) return;
+        if (this.currentDir.equals("s") && d.equals("w")) return;
+        if (this.currentDir.equals("a") && d.equals("d")) return;
+        if (this.currentDir.equals("d") && d.equals("a")) return;
+        
+        this.currentDir = d;
     }
 
-    public void setDirection(String input) {
-        String in = input.toLowerCase();
-        if (in.equals("w") || in.equals("a") || in.equals("s") || in.equals("d")) {
-            // Prevent immediate 180-degree turns (optional polish)
-            if (this.currentDir.equals("w") && in.equals("s")) return;
-            if (this.currentDir.equals("s") && in.equals("w")) return;
-            if (this.currentDir.equals("a") && in.equals("d")) return;
-            if (this.currentDir.equals("d") && in.equals("a")) return;
-            
-            this.currentDir = in;
-        } else if (in.equals("")) {
-            this.currentDir = "";
-        }
+    public String getCurrentDir() {
+        return this.currentDir;
     }
 
     public void move() {
         switch (currentDir) {
-            case "w" -> currentRow--;
-            case "s" -> currentRow++;
-            case "a" -> currentCol--;
-            case "d" -> currentCol++;
+            case "w" -> row--; // Up
+            case "s" -> row++; // Down
+            case "a" -> col--; // Left
+            case "d" -> col++; // Right
         }
     }
 
+    public void undoPosition(int oldR, int oldC) {
+        this.row = oldR;
+        this.col = oldC;
+    }
+
+    // --- GETTERS & HELPERS ---
+
+    public int getRow() { return row; }
+    public int getCol() { return col; }
+
+    public int getHealth() {
+        return this.lives;
+    }
+
+    // Used by the GUI to handle collision damage
     public void takeDamage(double amount) {
-        this.health -= amount;
-        if (this.health < 0) this.health = 0;
+        // Convert the double damage (0.5) to integer damage
+        int damage = (int) Math.ceil(amount);
+        this.lives -= damage;
+        if (this.lives < 0) this.lives = 0;
     }
 
-    public void undoPosition(int r, int c) {
-        this.currentRow = r;
-        this.currentCol = c;
-    }
-
+    // Determines what symbol the player leaves behind
     public String jetWallIcon() {
-        // Returns the trail icon based on where we CAME from
         return switch (currentDir) {
             case "w" -> "^";
-            case "s" -> "#";
+            case "s" -> "v";
             case "a" -> "<";
             case "d" -> ">";
-            default -> "P";
+            default -> "#";
         };
     }
-
-    // Getters and Setters
-    public int getRow() { return currentRow; }
-    public int getCol() { return currentCol; }
-    public double getHealth() { return health; }
-    public String getCurrentDir() { return currentDir; }
     
-    public void setHealth(double h) {
-        if (h < 0) throw new IllegalArgumentException("Invalid health");
-        this.health = h;
+    @Override
+    protected void applySpecificStats() {
+        // BasicMechanic is just for testing movement, so we don't need complex stats here.
+        System.out.println("BasicMechanic stats check passed.");
     }
-    // ==========================================================
-    // NEW METHODS ADDED FOR COLLISION MANAGER COMPATIBILITY
-    // ==========================================================
-
-    // 1. Alias methods (Your code calls X/Y, friend uses Col/Row)
-    public int getX() { return currentCol; } 
-    public int getY() { return currentRow; }
     
-    // 2. Identification (CollisionManager needs to know who owns the disc)
-    public String getName() { return name; }
-
-    // 3. Stop Movement (Called when hitting walls)
-    public void stopMovement() {
-        this.currentDir = ""; // Stops the auto-move loop
-    }
-
-    // 4. Kill switch (Called for holes)
-    public void setLives(double amount) {
-        this.health = amount;
-    }
-
-    // 5. Ammo Handling (Called when picking up disc)
-    public void addDisc(Disc d) {
-        inventory.add(d);
-        // Optional: System.out.println("Disc Reloaded!");
-    }
 }

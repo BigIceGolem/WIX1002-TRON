@@ -1,3 +1,5 @@
+package game; // FIXED: Added package
+
 public class Arena extends Map {
 
     public Arena(int rows, int cols, int levelNumber) {
@@ -11,12 +13,12 @@ public class Arena extends Map {
             case 1 -> designLevel1(); 
             case 2 -> designLevel2(); 
             case 3 -> designLevel3();
-            case 4 -> designLevel4(); // Added your random level
+            case 4 -> designLevel4(); 
             default -> designLevel1();
         }
     }
 
-    // --- LEVEL DESIGNS (Same as your logic) ---
+    // --- LEVEL DESIGNS ---
     private void designLevel1() {
         addRectObstacle(4, 4, 6, 2);   addRectObstacle(4, 4, 2, 6);   
         addRectObstacle(4, 34, 6, 2);  addRectObstacle(4, 30, 2, 6);  

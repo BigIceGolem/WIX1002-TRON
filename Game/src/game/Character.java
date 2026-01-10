@@ -77,6 +77,15 @@ public abstract class Character {
         }
     }
 
+
+public double getSpeed() {
+    return this.speed;
+}
+
+public String getName() {
+    return this.name;
+}
+    
     // Helper method to display the visual cutscene
     private void showCutscene(String title, String message, String imagePath) {
         // Load the image (Make sure you have an 'images' folder in your project!)

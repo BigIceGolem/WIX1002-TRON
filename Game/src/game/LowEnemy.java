@@ -1,12 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
-/**
- *
- * @author USER
- */
+package game;
 
 import java.awt.Point;
 import java.util.ArrayList;
@@ -27,7 +19,7 @@ public class LowEnemy extends EnemyBot {
         if (isValid(x-1, y, map)) validMoves.add("MOVE_LEFT");
         if (isValid(x+1, y, map)) validMoves.add("MOVE_RIGHT");
 
-        // 2. If stuck, just return something (and die)
+        // 2. If stuck, default to UP
         if (validMoves.isEmpty()) return "MOVE_UP";
 
         // 3. Pick Randomly
@@ -35,4 +27,3 @@ public class LowEnemy extends EnemyBot {
         return validMoves.get(rand.nextInt(validMoves.size()));
     }
 }
-
