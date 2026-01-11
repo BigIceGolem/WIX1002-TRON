@@ -15,6 +15,7 @@ public class TronGUI extends JFrame {
     private final int CELL_SIZE = 20; 
     private GamePanel gamePanel;
     private JLabel statusLabel;
+    private HashMap<String, Image> spriteMap = new HashMap<>();
     
     // VISUAL SETTINGS
     private final Color COLOR_OBSTACLE = new Color(138, 43, 226); 
@@ -41,10 +42,11 @@ public class TronGUI extends JFrame {
 
     public TronGUI(Character loadedPlayer) {
         this.player = (BasicMechanic) loadedPlayer;
-        
         this.setTitle("Tron - Campaign Mode");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout());
+        loadCharacterSprites(player.getName());
+
 
         gamePanel = new GamePanel();
         gamePanel.setPreferredSize(new Dimension(40 * CELL_SIZE, 40 * CELL_SIZE));
@@ -137,6 +139,24 @@ public class TronGUI extends JFrame {
             enemies.add(new Rinzler_CleverEnemy(35, 35, 0xFF0000));
         }
     }
+    
+    private void loadCharacterSprites(String name) {
+    spriteMap.clear(); // Clear old images
+    
+    // Convert name to lowercase (e.g., "Tron" -> "tron") for file finding
+    String prefix = name.toLowerCase().contains("kevin") ? "kevin" : "tron";
+
+    // Map the keys "w,a,s,d" to the correct image files
+    spriteMap.put("w", new ImageIcon(prefix + "_up.png").getImage());
+    spriteMap.put("s", new ImageIcon(prefix + "_down.png").getImage());
+    spriteMap.put("a", new ImageIcon(prefix + "_left.png").getImage());
+    spriteMap.put("d", new ImageIcon(prefix + "_right.png").getImage());
+    
+    // Handle the "stopped" state (empty string) - usually looks like facing down
+    spriteMap.put("", new ImageIcon(prefix + "_down.png").getImage());
+    
+    System.out.println("Loaded sprites for: " + prefix);
+}
 
     private void gameLoop() {
         if (!playerHasMoved) {
@@ -266,10 +286,15 @@ public class TronGUI extends JFrame {
             double currentLives = player.getHealth();
             Character newKevin = CharacterStats.loadCharacter("Kevin");
             if (newKevin == null) newKevin = new KevinFlynn(); 
+            this.player = (BasicMechanic) newKevin;
             
             newKevin.setLives(currentLives);
             newKevin.gainXP((int)currentXP); 
             this.player = (BasicMechanic) newKevin; 
+            
+           
+                loadCharacterSprites("Kevin");
+
             setupLevel(currentLevel); 
             JOptionPane.showMessageDialog(this, "Switched to KEVIN FLYNN.\nStats loaded & updated.");
         }
@@ -430,9 +455,29 @@ public class TronGUI extends JFrame {
                 g.fillRect(enemy.getX() * CELL_SIZE + 5, enemy.getY() * CELL_SIZE + 5, 10, 10);
             }
             
-            if (player.getName().contains("Kevin")) g.setColor(KEVIN_BODY);
-            else g.setColor(TRON_BODY);
-            g.fillRect(player.getCol() * CELL_SIZE, player.getRow() * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            
+int px = player.getCol() * CELL_SIZE;
+int py = player.getRow() * CELL_SIZE;
+int visualSize = 32; // Try 30 or 32 for a nice overlap
+int offset = (visualSize - CELL_SIZE) / 2; // Math to center the image
+
+// 1. Get the current direction ("w", "a", "s", "d", or "")
+String dir = player.getCurrentDir();
+
+// 2. Pick the matching image from our Map
+Image currentImg = spriteMap.get(dir);
+
+// 1. Try to draw the image
+// 3. Draw it!
+if (currentImg != null && currentImg.getWidth(null) > -1) {
+    g.drawImage(currentImg, px - offset, py - offset, visualSize, visualSize, null);
+} 
+else {
+    // Fallback if image file is missing
+    if (player.getName().contains("Kevin")) g.setColor(KEVIN_BODY);
+    else g.setColor(TRON_BODY);
+    g.fillRect(px, py, CELL_SIZE, CELL_SIZE);
+}
         }
     }
 }
