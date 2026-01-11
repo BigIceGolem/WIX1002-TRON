@@ -6,7 +6,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList; 
-import java.util.List;      
+import java.util.List;
+import java.util.HashMap;  // <-- ADDED
+
 
 public class TronGUI extends JFrame {
     
@@ -19,9 +21,11 @@ public class TronGUI extends JFrame {
     // Game Objects
     private Arena myMap;
     private BasicMechanic player; 
-    private Disc myDisc; 
-    private EnemyBot enemy; 
-    
+    private Disc myDisc;  
+    private List<EnemyBot> enemies = new ArrayList<>();  // <-- ADDED: Changed from single enemy to list
+    private int enemyMoveCounter = 0;                    // <-- ADDED: For enemy movement timing
+    private HashMap<Point, EnemyBot> enemyTrails = new HashMap<>();  // <-- ADDED: Track enemy trails
+    private boolean playerHasMoved = false;  // <-- ADD THIS LINE
     private Timer gameTimer;
     private long lastHitTime = 0;
 
@@ -38,7 +42,7 @@ public class TronGUI extends JFrame {
         gamePanel.setPreferredSize(new Dimension(myMap.getCols() * CELL_SIZE, myMap.getRows() * CELL_SIZE));
         this.add(gamePanel, BorderLayout.CENTER);
 
-        statusLabel = new JLabel(" Health: " + player.getHealth() + " | WASD to Move | SPACE to Throw | R to Restart");
+        statusLabel = new JLabel(" Health: " + player.getHealth() + " | Enemies: " + enemies.size() +" | WASD to Move | SPACE to Throw | R to Restart");
         statusLabel.setFont(new Font("Arial", Font.BOLD, 14));
         statusLabel.setForeground(Color.WHITE);
         statusLabel.setBackground(Color.DARK_GRAY);
@@ -75,10 +79,31 @@ public class TronGUI extends JFrame {
         myMap = new Arena(40, 40, 4); 
         this.player = (BasicMechanic) loadedPlayer;
         myDisc = new Disc("Tron");
-        enemy = new LowEnemy(5, 5, 1); 
+        initializeEnemies(); 
+    }
+    
+     private void initializeEnemies() {
+        enemies.clear();
+        enemyTrails.clear();
+        
+        // Add 4 different enemy types at corners
+        enemies.add(new BrilliantEnemy(5, 5, 0xFFD700));    // Gold - top-left
+        enemies.add(new CleverEnemy(35, 5, 0xFF0000));      // Red - top-right  
+        enemies.add(new ModerateEnemy(5, 35, 0xFFFF00));    // Yellow - bottom-left
+        enemies.add(new LowEnemy(35, 35, 0x00FF00));        // Green - bottom-right
     }
 
     private void gameLoop() {
+        // --- 0. CHECK IF PLAYER HAS STARTED MOVING ---
+        if (!playerHasMoved && !player.getCurrentDir().equals("")) {
+            playerHasMoved = true;  // <-- Player started moving
+        }
+        
+        // Don't move enemies until player has moved
+        if (!playerHasMoved) {
+            gamePanel.repaint();
+            return;  // <-- Exit early
+        }
         // --- 1. PLAYER LOGIC ---
         if (!player.getCurrentDir().equals("")) {
             int oldR = player.getRow();
@@ -103,7 +128,10 @@ public class TronGUI extends JFrame {
             boolean isObstacle = hitTarget.equals(Map.OBSTACLE);
             boolean isTrail = hitTarget.equals("^") || hitTarget.equals("#") || hitTarget.equals("<") || hitTarget.equals(">");
             // Check for Enemy Trail (The new "E_TRAIL" marker)
-            boolean isEnemyTrail = hitTarget.equals("E_TRAIL");
+            boolean isEnemyTrail = hitTarget.equals("B") || hitTarget.equals("C") ||
+                                   hitTarget.equals("M") || hitTarget.equals("L") ||
+                                   hitTarget.equals("E");
+
 
             if (isObstacle || isTrail || isEnemyTrail) {
                 long currentTime = System.currentTimeMillis();
@@ -131,36 +159,15 @@ public class TronGUI extends JFrame {
             myMap.setLocation(player.getRow(), player.getCol(), player.jetWallIcon());
         }
 
-        // --- 2. ENEMY LOGIC (FIXED) ---
-        List<EnemyBot> bots = new ArrayList<>();
-        bots.add(enemy);
-
-        String moveChoice = enemy.makeMove(myMap, new Point(player.getCol(), player.getRow()), bots);
-
-        int oldEX = enemy.getX(); 
-        int oldEY = enemy.getY(); 
-        
-        // Calculate the NEW position first (Don't move yet)
-        int newEX = oldEX;
-        int newEY = oldEY;
-
-        switch (moveChoice) {
-            case "MOVE_UP" -> newEY--;
-            case "MOVE_DOWN" -> newEY++;
-            case "MOVE_LEFT" -> newEX--;
-            case "MOVE_RIGHT" -> newEX++;
+        // --- 2. ENEMY LOGIC (UPDATED FROM CODE 1) ---
+        enemyMoveCounter++;
+        if (enemyMoveCounter >= 2) {
+            moveEnemies(new Point(player.getCol(), player.getRow()));
+            enemyMoveCounter = 0;
         }
-
-        // BOUNDARY CHECK: Only move if inside the map (0 to 39)
-        if (newEX >= 0 && newEX < myMap.getCols() && newEY >= 0 && newEY < myMap.getRows()) {
-            enemy.x = newEX;
-            enemy.y = newEY;
-            
-            // Leave a YELLOW trail behind using our new code "E_TRAIL"
-            myMap.setLocation(oldEY, oldEX, "E_TRAIL");
-        } 
-        // If invalid (out of bounds), the enemy simply waits this turn.
-
+        
+        // Check collisions between player and enemies
+        checkEnemyCollisions(new Point(player.getCol(), player.getRow()));
         // --- 3. DISC LOGIC ---
         myDisc.update();
         
@@ -170,6 +177,119 @@ public class TronGUI extends JFrame {
         
         statusLabel.setText(" Health: " + player.getHealth() + " | WASD to Move | SPACE to Throw | R to Restart");
         gamePanel.repaint(); 
+    }
+    
+        // Method to move all enemies
+    private void moveEnemies(Point playerPos) {
+        for (int i = enemies.size() - 1; i >= 0; i--) {
+            EnemyBot enemy = enemies.get(i);
+            
+            int oldX = enemy.x;
+            int oldY = enemy.y;
+            
+            String move = enemy.makeMove(myMap, playerPos, enemies);
+            
+            if (move.startsWith("MOVE")) {
+                int newX = enemy.x;
+                int newY = enemy.y;
+                
+                switch (move) {
+                    case "MOVE_UP" -> newY--;
+                    case "MOVE_DOWN" -> newY++;
+                    case "MOVE_LEFT" -> newX--;
+                    case "MOVE_RIGHT" -> newX++;
+                }
+                
+                // Check if move is valid
+                if (isValidEnemyMove(oldX, oldY, newX, newY, enemy)) {
+                    // Leave appropriate trail based on enemy type
+                    String trailIcon = getEnemyTrailIcon(enemy);
+                    myMap.setLocation(oldY, oldX, trailIcon);
+                    enemy.x = newX;
+                    enemy.y = newY;
+                } else {
+                    // Kill enemy if invalid move
+                    killEnemy(enemy, i, "crashed!");
+                }
+            }
+        }
+    }
+    
+    // Helper method to get trail icon for each enemy type
+    private String getEnemyTrailIcon(EnemyBot enemy) {
+        if (enemy instanceof BrilliantEnemy) return "B";
+        if (enemy instanceof CleverEnemy) return "C";
+        if (enemy instanceof ModerateEnemy) return "M";
+        if (enemy instanceof LowEnemy) return "L";
+        return "E";  // Default
+    }
+    
+    // Check if enemy move is valid
+    private boolean isValidEnemyMove(int oldX, int oldY, int newX, int newY, EnemyBot enemy) {
+        if (newX < 0 || newX >= myMap.getCols() || newY < 0 || newY >= myMap.getRows()) {
+            return false;
+        }
+        
+        String cell = myMap.getIconAt(newY, newX);
+        
+        // Check for obstacles and trails
+        if (cell.equals(Map.OBSTACLE) ||
+            cell.equals("^") || cell.equals("#") || cell.equals("<") || cell.equals(">") ||
+            cell.equals("B") || cell.equals("C") || cell.equals("M") || cell.equals("L") || cell.equals("E")) {
+            return false;
+        }
+        
+        // Check for other enemies
+        for (EnemyBot other : enemies) {
+            if (other != enemy && other.x == newX && other.y == newY) {
+                return false;
+            }
+        }
+        
+        // Check for player
+        if (newX == player.getCol() && newY == player.getRow()) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // Check collisions between player and enemies
+    private void checkEnemyCollisions(Point playerPos) {
+        for (int i = enemies.size() - 1; i >= 0; i--) {
+            EnemyBot enemy = enemies.get(i);
+            
+            if (playerPos.x == enemy.x && playerPos.y == enemy.y) {
+                player.takeDamage(1.0);
+                statusLabel.setText(" Health: " + player.getHealth() + " | HIT BY " + enemy.getName() + "!");
+                
+                killEnemy(enemy, i, "was destroyed by player collision!");
+                
+                if (player.getHealth() <= 0) {
+                    endGame("GAME OVER! Defeated by " + enemy.getName());
+                    return;
+                }
+            }
+        }
+    }
+    
+    // Kill enemy method
+    private void killEnemy(EnemyBot enemy, int index, String reason) {
+        // Mark enemy death position as trail
+        myMap.setLocation(enemy.y, enemy.x, getEnemyTrailIcon(enemy));
+        
+        // Remove enemy from list
+        enemies.remove(index);
+        
+        // Update status
+        statusLabel.setText(" Health: " + player.getHealth() + 
+                          " | " + enemy.getName() + " " + reason + 
+                          " | Enemies remaining: " + enemies.size());
+        
+        // Check for victory
+        if (enemies.isEmpty()) {
+            endGame("VICTORY! All enemies defeated!");
+        }
     }
 
     private void endGame(String msg) {
@@ -181,6 +301,7 @@ public class TronGUI extends JFrame {
     private void resetGame() {
         setupGameObjects(this.player);
         player.setDirection(""); 
+        playerHasMoved = false;  // <-- ADD THIS LINE
         statusLabel.setText(" Health: " + player.getHealth() + " | Game Reset! | R to Restart");
         gamePanel.repaint();
     }
@@ -210,11 +331,35 @@ public class TronGUI extends JFrame {
                         g.setColor(Color.GREEN); 
                         g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
                     }
-                    // NEW: Draw Enemy Trail as YELLOW
-                    else if (icon.equals("E_TRAIL")) {
-                        g.setColor(Color.YELLOW); 
+                    // Draw enemy trail colors 
+                    else if (icon.equals("B")) {  // Brilliant enemy trail
+                        g.setColor(new Color(255, 215, 0));  // Gold
                         g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-                        g.setColor(Color.ORANGE); 
+                        g.setColor(new Color(200, 170, 0));
+                        g.drawRect(x, y, CELL_SIZE, CELL_SIZE);
+                    }
+                    else if (icon.equals("C")) {  // Clever enemy trail
+                        g.setColor(Color.RED);
+                        g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                        g.setColor(new Color(200, 0, 0));
+                        g.drawRect(x, y, CELL_SIZE, CELL_SIZE);
+                    }
+                    else if (icon.equals("M")) {  // Moderate enemy trail
+                        g.setColor(Color.YELLOW);
+                        g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                        g.setColor(new Color(200, 200, 0));
+                        g.drawRect(x, y, CELL_SIZE, CELL_SIZE);
+                    }
+                    else if (icon.equals("L")) {  // Low enemy trail
+                        g.setColor(Color.GREEN);
+                        g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                        g.setColor(new Color(0, 200, 0));
+                        g.drawRect(x, y, CELL_SIZE, CELL_SIZE);
+                    }
+                    else if (icon.equals("E")) {  // Default enemy trail
+                        g.setColor(Color.WHITE);
+                        g.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                        g.setColor(new Color(200, 200, 200));
                         g.drawRect(x, y, CELL_SIZE, CELL_SIZE);
                     }
                     else if (!icon.equals(Map.EMPTY)) {
@@ -235,12 +380,23 @@ public class TronGUI extends JFrame {
                 g.fillOval(dx + 2, dy + 2, 16, 16); 
             }
 
-            // Draw Enemy (Magenta to stand out)
-            g.setColor(Color.MAGENTA); 
-            g.fillRect(enemy.getX() * CELL_SIZE, enemy.getY() * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-            g.setColor(Color.WHITE); 
-            g.fillRect((enemy.getX() * CELL_SIZE) + 5, (enemy.getY() * CELL_SIZE) + 5, 10, 10);
-
+                       // Draw all enemies (ADDED FROM CODE 1)
+            for (EnemyBot enemy : enemies) {
+                Color enemyColor = new Color(enemy.color);
+                g.setColor(enemyColor);
+                
+                g.fillRect(enemy.getX() * CELL_SIZE, enemy.getY() * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                
+                g.setColor(Color.WHITE);
+                g.drawRect(enemy.getX() * CELL_SIZE, enemy.getY() * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                
+                // Draw enemy initial
+                g.setFont(new Font("Arial", Font.BOLD, 10));
+                String enemyInitial = enemy.getName().substring(0, 1);
+                g.drawString(enemyInitial, 
+                           (enemy.getX() * CELL_SIZE) + 7, 
+                           (enemy.getY() * CELL_SIZE) + 12);
+            }
             // Draw Player
             g.setColor(Color.BLUE); 
             g.fillRect(player.getCol() * CELL_SIZE, player.getRow() * CELL_SIZE, CELL_SIZE, CELL_SIZE);
