@@ -3,15 +3,15 @@ package game;
 import java.awt.Point;
 import java.util.List;
 
-public class ModerateEnemy extends EnemyBot {
+public class Sork_ModerateEnemy extends Enemy {
 
-    public ModerateEnemy(int x, int y, int c) { 
+    public Sork_ModerateEnemy(int x, int y, int c) { 
         super(x, y, c, "ModerateEnemy"); 
     }
 
     @Override
 
-public String makeMove(Map map, Point playerPos, List<EnemyBot> allBots) {
+public String makeMove(Map map, Point playerPos, List<Enemy> allBots) {
     // 1. Attack Check
     if (canShoot(playerPos)) {
         if (playerPos.y < y) return "THROW_UP";

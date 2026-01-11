@@ -3,7 +3,7 @@ package game;
 import java.awt.Point;
 import java.util.List;
 
-public abstract class EnemyBot {
+public abstract class Enemy {
     
     public int x, y;
     public int color;
@@ -20,7 +20,7 @@ public abstract class EnemyBot {
     protected int trailColor = 0xFFFFFF;
     protected String lastDirection = "";
 
-    public EnemyBot(int x, int y, int c, String name) {
+    public Enemy(int x, int y, int c, String name) {
         this.x = x;
         this.y = y;
         this.color = c;
@@ -46,7 +46,7 @@ public abstract class EnemyBot {
         }
     }
 
-    public abstract String makeMove(Map map, Point playerPos, List<EnemyBot> allBots);
+    public abstract String makeMove(Map map, Point playerPos, List<Enemy> allBots);
 
     public void updateStatus() {
         if (cooldownTimer > 0) cooldownTimer--;

@@ -3,14 +3,14 @@ package game;
 import java.awt.Point;
 import java.util.List;
 
-public class BrilliantEnemy extends EnemyBot {
+public class Clu_BrilliantEnemy extends Enemy {
 
-    public BrilliantEnemy(int x, int y, int c) { 
+    public Clu_BrilliantEnemy(int x, int y, int c) { 
         super(x, y, c, "BrilliantEnemy");
     }
 
     @Override
-    public String makeMove(Map map, Point playerPos, List<EnemyBot> allBots) {
+    public String makeMove(Map map, Point playerPos, List<Enemy> allBots) {
         updateStatus();
         
         if (canShoot(playerPos) && diskAmmo > 0 && cooldownTimer == 0) {
@@ -47,7 +47,7 @@ public class BrilliantEnemy extends EnemyBot {
                 score += 30;
             }
 
-            for (EnemyBot bot : allBots) {
+            for (Enemy bot : allBots) {
                 if (bot != this && bot.x == tx && bot.y == ty) {
                     score -= 100;
                 }

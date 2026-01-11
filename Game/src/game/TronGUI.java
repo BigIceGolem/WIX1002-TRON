@@ -22,9 +22,9 @@ public class TronGUI extends JFrame {
     private Arena myMap;
     private BasicMechanic player; 
     private Disc myDisc;  
-    private List<EnemyBot> enemies = new ArrayList<>();  // <-- ADDED: Changed from single enemy to list
+    private List<Enemy> enemies = new ArrayList<>();  // <-- ADDED: Changed from single enemy to list
     private int enemyMoveCounter = 0;                    // <-- ADDED: For enemy movement timing
-    private HashMap<Point, EnemyBot> enemyTrails = new HashMap<>();  // <-- ADDED: Track enemy trails
+    private HashMap<Point, Enemy> enemyTrails = new HashMap<>();  // <-- ADDED: Track enemy trails
     private boolean playerHasMoved = false;  // <-- ADD THIS LINE
     private Timer gameTimer;
     private long lastHitTime = 0;
@@ -87,10 +87,10 @@ public class TronGUI extends JFrame {
         enemyTrails.clear();
         
         // Add 4 different enemy types at corners
-        enemies.add(new BrilliantEnemy(5, 5, 0xFFD700));    // Gold - top-left
-        enemies.add(new CleverEnemy(35, 5, 0xFF0000));      // Red - top-right  
-        enemies.add(new ModerateEnemy(5, 35, 0xFFFF00));    // Yellow - bottom-left
-        enemies.add(new LowEnemy(35, 35, 0x00FF00));        // Green - bottom-right
+        enemies.add(new Clu_BrilliantEnemy(5, 5, 0xFFD700));    // Gold - top-left
+        enemies.add(new Rinzler_CleverEnemy(35, 5, 0xFF0000));      // Red - top-right  
+        enemies.add(new Sork_ModerateEnemy(5, 35, 0xFFFF00));    // Yellow - bottom-left
+        enemies.add(new Koura_LowEnemy(35, 35, 0x00FF00));        // Green - bottom-right
     }
 
     private void gameLoop() {
@@ -182,7 +182,7 @@ public class TronGUI extends JFrame {
         // Method to move all enemies
     private void moveEnemies(Point playerPos) {
         for (int i = enemies.size() - 1; i >= 0; i--) {
-            EnemyBot enemy = enemies.get(i);
+            Enemy enemy = enemies.get(i);
             
             int oldX = enemy.x;
             int oldY = enemy.y;
@@ -216,16 +216,16 @@ public class TronGUI extends JFrame {
     }
     
     // Helper method to get trail icon for each enemy type
-    private String getEnemyTrailIcon(EnemyBot enemy) {
-        if (enemy instanceof BrilliantEnemy) return "B";
-        if (enemy instanceof CleverEnemy) return "C";
-        if (enemy instanceof ModerateEnemy) return "M";
-        if (enemy instanceof LowEnemy) return "L";
+    private String getEnemyTrailIcon(Enemy enemy) {
+        if (enemy instanceof Clu_BrilliantEnemy) return "B";
+        if (enemy instanceof Rinzler_CleverEnemy) return "C";
+        if (enemy instanceof Sork_ModerateEnemy) return "M";
+        if (enemy instanceof Koura_LowEnemy) return "L";
         return "E";  // Default
     }
     
     // Check if enemy move is valid
-    private boolean isValidEnemyMove(int oldX, int oldY, int newX, int newY, EnemyBot enemy) {
+    private boolean isValidEnemyMove(int oldX, int oldY, int newX, int newY, Enemy enemy) {
         if (newX < 0 || newX >= myMap.getCols() || newY < 0 || newY >= myMap.getRows()) {
             return false;
         }
@@ -240,7 +240,7 @@ public class TronGUI extends JFrame {
         }
         
         // Check for other enemies
-        for (EnemyBot other : enemies) {
+        for (Enemy other : enemies) {
             if (other != enemy && other.x == newX && other.y == newY) {
                 return false;
             }
@@ -257,7 +257,7 @@ public class TronGUI extends JFrame {
     // Check collisions between player and enemies
     private void checkEnemyCollisions(Point playerPos) {
         for (int i = enemies.size() - 1; i >= 0; i--) {
-            EnemyBot enemy = enemies.get(i);
+            Enemy enemy = enemies.get(i);
             
             if (playerPos.x == enemy.x && playerPos.y == enemy.y) {
                 player.takeDamage(1.0);
@@ -274,7 +274,7 @@ public class TronGUI extends JFrame {
     }
     
     // Kill enemy method
-    private void killEnemy(EnemyBot enemy, int index, String reason) {
+    private void killEnemy(Enemy enemy, int index, String reason) {
         // Mark enemy death position as trail
         myMap.setLocation(enemy.y, enemy.x, getEnemyTrailIcon(enemy));
         
@@ -381,7 +381,7 @@ public class TronGUI extends JFrame {
             }
 
                        // Draw all enemies (ADDED FROM CODE 1)
-            for (EnemyBot enemy : enemies) {
+            for (Enemy enemy : enemies) {
                 Color enemyColor = new Color(enemy.color);
                 g.setColor(enemyColor);
                 

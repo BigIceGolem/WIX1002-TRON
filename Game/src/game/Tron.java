@@ -5,7 +5,7 @@ public class Tron extends BasicMechanic {
     public Tron() {
         this.name = "Tron";
         // NO HARDCODED STATS HERE.
-        // The GameLoader/CharacterStats class will read characters.txt 
+        // The CharacterStats class will read characters.txt 
         // and set this.speed, this.handling, etc.
     }
 

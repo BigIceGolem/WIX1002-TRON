@@ -3,16 +3,16 @@ package game;
 import java.awt.Point;
 import java.util.List;
 
-public class CleverEnemy extends EnemyBot {
+public class Rinzler_CleverEnemy extends Enemy {
 
-    public CleverEnemy(int x, int y, int c) { 
+    public Rinzler_CleverEnemy(int x, int y, int c) { 
         super(x, y, c, "CleverEnemy"); 
     }
 
     @Override
-    public String makeMove(Map map, Point playerPos, List<EnemyBot> allBots) {
-        EnemyBot partner = null;
-        for(EnemyBot b : allBots) {
+    public String makeMove(Map map, Point playerPos, List<Enemy> allBots) {
+        Enemy partner = null;
+        for(Enemy b : allBots) {
             if (b != this) { 
                 partner = b; 
                 break; 

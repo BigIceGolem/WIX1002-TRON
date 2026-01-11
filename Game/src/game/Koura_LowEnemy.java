@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class LowEnemy extends EnemyBot {
+public class Koura_LowEnemy extends Enemy {
 
-    public LowEnemy(int x, int y, int c) { 
+    public Koura_LowEnemy(int x, int y, int c) { 
         super(x, y, c, "LowEnemy"); 
     }
 
     @Override
-    public String makeMove(Map map, Point playerPos, List<EnemyBot> allBots) {
+    public String makeMove(Map map, Point playerPos, List<Enemy> allBots) {
         List<String> validMoves = new ArrayList<>();
         
         if (isValid(x, y-1, map)) validMoves.add("MOVE_UP");
