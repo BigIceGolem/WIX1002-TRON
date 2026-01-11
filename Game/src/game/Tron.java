@@ -1,6 +1,6 @@
 package game;
 
-public class Tron extends Character {
+public class Tron extends BasicMechanic {
 
     public Tron() {
         this.name = "Tron";

@@ -25,9 +25,9 @@ public class TronGUI extends JFrame {
     private Timer gameTimer;
     private long lastHitTime = 0;
 
-    public TronGUI() {
+    public TronGUI(Character loadedPlayer) {
         // 1. Setup Logic
-        setupGameObjects(); 
+        setupGameObjects(loadedPlayer); 
 
         // 2. Setup GUI
         this.setTitle("Tron - Color Remastered");
@@ -71,9 +71,9 @@ public class TronGUI extends JFrame {
         gameTimer.start();
     }
     
-    private void setupGameObjects() {
+    private void setupGameObjects(Character loadedPlayer) {
         myMap = new Arena(40, 40, 4); 
-        player = new BasicMechanic();
+        this.player = (BasicMechanic) loadedPlayer;
         myDisc = new Disc("Tron");
         enemy = new LowEnemy(5, 5, 1); 
     }
@@ -179,7 +179,7 @@ public class TronGUI extends JFrame {
     }
     
     private void resetGame() {
-        setupGameObjects();
+        setupGameObjects(this.player);
         player.setDirection(""); 
         statusLabel.setText(" Health: " + player.getHealth() + " | Game Reset! | R to Restart");
         gamePanel.repaint();

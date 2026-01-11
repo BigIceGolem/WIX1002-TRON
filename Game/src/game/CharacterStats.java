@@ -7,6 +7,7 @@ import java.util.Scanner;
 public class CharacterStats {
 
     public static Character loadCharacter(String name) {
+        System.out.println("DEBUG: The loadCharacter method has started!");
         
         try {
             // Looks for characters.txt in the project folder
