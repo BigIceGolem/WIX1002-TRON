@@ -1,4 +1,4 @@
-package game; // FIXED: Added package
+package game; 
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
