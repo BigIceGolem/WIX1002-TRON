@@ -1,4 +1,4 @@
-package game; // FIXED: Added package
+package game; 
 
 public class Arena extends Map {
 
@@ -8,7 +8,7 @@ public class Arena extends Map {
     }
 
     private void loadLevel(int level) {
-        genEmptyBoard(); // Clear first
+        genEmptyBoard(); 
         switch (level) {
             case 1 -> designLevel1(); 
             case 2 -> designLevel2(); 
@@ -19,6 +19,7 @@ public class Arena extends Map {
     }
 
     // --- LEVEL DESIGNS ---
+    
     private void designLevel1() {
         addRectObstacle(4, 4, 6, 2);   addRectObstacle(4, 4, 2, 6);   
         addRectObstacle(4, 34, 6, 2);  addRectObstacle(4, 30, 2, 6);  
@@ -30,14 +31,32 @@ public class Arena extends Map {
         setLocation(19, 4, SPEED_RAMP);   setLocation(19, 35, SPEED_RAMP);
     }
 
+    // --- UPDATED: SYMMETRICAL CROSS ---
     private void designLevel2() {
+        // 1. Diagonal Walls (The "X" shape border)
         for(int i = 0; i < 8; i++) {
             setLocation(i, i, OBSTACLE);           setLocation(i, 39-i, OBSTACLE);
             setLocation(39-i, i, OBSTACLE);       setLocation(39-i, 39-i, OBSTACLE);
         }
-        addRectObstacle(10, 19, 8, 2);  addRectObstacle(18, 16, 2, 8);
-        addRectObstacle(22, 19, 8, 2);  addRectObstacle(20, 16, 2, 8);
-        setLocation(19, 1, SPEED_RAMP); setLocation(19, 38, SPEED_RAMP);
+        
+        // 2. The Vertical Pillars (Top and Bottom)
+        // Center is at Col 19-20. 
+        addRectObstacle(10, 19, 8, 2);  // Top Pillar
+        addRectObstacle(22, 19, 8, 2);  // Bottom Pillar
+        
+        // 3. The Horizontal Arms (With Gaps!)
+        // I removed the middle block that was blocking the left side.
+        // Now both arms stop before hitting the center, creating a gap.
+        
+        // Left Arm: Rows 20-21, Cols 10-16 (Gap at 17, 18)
+        addRectObstacle(20, 10, 2, 7); 
+        
+        // Right Arm: Rows 20-21, Cols 23-29 (Gap at 21, 22)
+        addRectObstacle(20, 23, 2, 7); 
+        
+        // 4. Speed Ramps placed in the safe zone
+        setLocation(19, 1, SPEED_RAMP); 
+        setLocation(19, 38, SPEED_RAMP);
     }
 
     private void designLevel3() {

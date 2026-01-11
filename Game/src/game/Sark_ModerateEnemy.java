@@ -3,9 +3,9 @@ package game;
 import java.awt.Point;
 import java.util.List;
 
-public class Sork_ModerateEnemy extends Enemy {
+public class Sark_ModerateEnemy extends Enemy {
 
-    public Sork_ModerateEnemy(int x, int y, int c) { 
+    public Sark_ModerateEnemy(int x, int y, int c) { 
         super(x, y, c, "ModerateEnemy"); 
     }
 

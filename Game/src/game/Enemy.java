@@ -2,6 +2,7 @@ package game;
 
 import java.awt.Point;
 import java.util.List;
+import java.util.LinkedList; // Added
 
 public abstract class Enemy {
     
@@ -10,12 +11,13 @@ public abstract class Enemy {
     public String name;
     public String displayName;
     
-    // Inventory Mechanics
+    // NEW: Trail Memory
+    protected LinkedList<Point> trailHistory = new LinkedList<>();
+    
     protected int diskAmmo = 1;
     protected int cooldownTimer = 0;
     protected int maxCooldown = 5;
     
-    // Trail management
     protected String trailIcon = "E";
     protected int trailColor = 0xFFFFFF;
     protected String lastDirection = "";
@@ -48,34 +50,20 @@ public abstract class Enemy {
 
     public abstract String makeMove(Map map, Point playerPos, List<Enemy> allBots);
 
-    public void updateStatus() {
-        if (cooldownTimer > 0) cooldownTimer--;
-    }
+    public void updateStatus() { if (cooldownTimer > 0) cooldownTimer--; }
     
-    public void pickupDisk() {
-        diskAmmo++;
-        System.out.println(displayName + " picked up a disk! Ammo: " + diskAmmo);
-    }
+    public void pickupDisk() { diskAmmo++; }
 
     protected boolean canShoot(Point p) {
         if (diskAmmo <= 0 || cooldownTimer > 0) return false;
-        
         int dx = p.x - this.x;
         int dy = p.y - this.y;
-        
-        if (dy == 0 && Math.abs(dx) <= 3) return true;
-        if (dx == 0 && Math.abs(dy) <= 3) return true;
-        
-        return false;
+        return (dy == 0 && Math.abs(dx) <= 3) || (dx == 0 && Math.abs(dy) <= 3);
     }
 
     protected boolean isValid(int tx, int ty, Map map) {
-        if (tx < 0 || tx >= map.getCols() || ty < 0 || ty >= map.getRows()) {
-            return false;
-        }
-        
+        if (tx < 0 || tx >= map.getCols() || ty < 0 || ty >= map.getRows()) return false;
         String cell = map.getIconAt(ty, tx);
-        
         return !cell.equals(Map.OBSTACLE) && 
                !cell.equals("^") && !cell.equals("#") && 
                !cell.equals("<") && !cell.equals(">") &&
@@ -89,12 +77,12 @@ public abstract class Enemy {
         return trailIcon;
     }
     
+    // NEW: Accessor for trail logic
+    public LinkedList<Point> getTrailHistory() { return trailHistory; }
+    
     public String getDirectionTrailIcon() {
         return switch (lastDirection) {
-            case "MOVE_UP" -> "B";
-            case "MOVE_DOWN" -> "B";
-            case "MOVE_LEFT" -> "B";
-            case "MOVE_RIGHT" -> "B";
+            case "MOVE_UP", "MOVE_DOWN", "MOVE_LEFT", "MOVE_RIGHT" -> trailIcon; // Simplified to just leave color trail
             default -> trailIcon;
         };
     }

@@ -1,44 +1,40 @@
 package game;
 
+import java.awt.Point;
+import java.util.LinkedList;
+
 public class BasicMechanic extends Character {
     
-    // Grid Position
     private int row;
     private int col;
-    private String currentDir = ""; // "w", "a", "s", "d"
+    private String currentDir = ""; 
+    
+    // NEW: Memory for disappearing trails
+    private LinkedList<Point> trailHistory = new LinkedList<>();
 
     public BasicMechanic() {
-        // Set starting position (Center of map roughly)
         this.row = 20;
         this.col = 20;
-        
-        // Default health for the GUI to display
-        this.lives = 100; 
+        this.lives = 5.0; 
         this.name = "Player";
     }
 
-    // --- MOVEMENT METHODS (Fixes the Red Lines) ---
-
     public void setDirection(String d) {
-        // Prevent 180-degree turns (optional, but good for Tron)
         if (this.currentDir.equals("w") && d.equals("s")) return;
         if (this.currentDir.equals("s") && d.equals("w")) return;
         if (this.currentDir.equals("a") && d.equals("d")) return;
         if (this.currentDir.equals("d") && d.equals("a")) return;
-        
         this.currentDir = d;
     }
 
-    public String getCurrentDir() {
-        return this.currentDir;
-    }
+    public String getCurrentDir() { return this.currentDir; }
 
     public void move() {
         switch (currentDir) {
-            case "w" -> row--; // Up
-            case "s" -> row++; // Down
-            case "a" -> col--; // Left
-            case "d" -> col++; // Right
+            case "w" -> row--; 
+            case "s" -> row++; 
+            case "a" -> col--; 
+            case "d" -> col++; 
         }
     }
 
@@ -47,24 +43,12 @@ public class BasicMechanic extends Character {
         this.col = oldC;
     }
 
-    // --- GETTERS & HELPERS ---
-
     public int getRow() { return row; }
     public int getCol() { return col; }
+    
+    // NEW: Access to trail history
+    public LinkedList<Point> getTrailHistory() { return trailHistory; }
 
-    public int getHealth() {
-        return this.lives;
-    }
-
-    // Used by the GUI to handle collision damage
-    public void takeDamage(double amount) {
-        // Convert the double damage (0.5) to integer damage
-        int damage = (int) Math.ceil(amount);
-        this.lives -= damage;
-        if (this.lives < 0) this.lives = 0;
-    }
-
-    // Determines what symbol the player leaves behind
     public String jetWallIcon() {
         return switch (currentDir) {
             case "w" -> "^";
@@ -77,8 +61,6 @@ public class BasicMechanic extends Character {
     
     @Override
     protected void applySpecificStats() {
-        // BasicMechanic is just for testing movement, so we don't need complex stats here.
         System.out.println("BasicMechanic stats check passed.");
     }
-    
 }
