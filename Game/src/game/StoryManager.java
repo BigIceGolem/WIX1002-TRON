@@ -48,18 +48,18 @@ public class StoryManager extends JPanel {
             // 1. FIRST VIDEO
             // Make sure you have 'video1.gif' in your images folder
             setImage("video1.gif"); 
-            currentText = "System Booting..."; 
+            currentText = "SYSTEM ONLINE. WELCOME USER..."; 
         } 
         else if (sceneStep == 1) {
             // 2. NARRATIVE TEXT
             // You can use a static background image here
             setImage("imageIII.jpeg"); 
-            currentText = "Welcome to TRON..."; // The text you requested
+            currentText = "The Grid. A digital frontier..."; // The text you requested
         } 
         else if (sceneStep == 2) {
             // 3. SECOND VIDEO
             setImage("video2.gif"); 
-            currentText = "Entering the Grid...";
+            currentText = "INITIALIZING LIGHT CYCLES... SURVIVE THE ARENA.";
         } 
         else {
             // End of sequence
