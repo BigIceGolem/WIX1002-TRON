@@ -17,6 +17,9 @@ public class TronGUI extends JFrame {
     private JLabel statusLabel;
     private HashMap<String, Image> spriteMap = new HashMap<>();
     
+    //Videos & narrative
+    private StoryManager storyManager; // <--- ADD THIS
+    
     // VISUAL SETTINGS
     private final Color COLOR_OBSTACLE = new Color(138, 43, 226); 
     private final int MAX_TRAIL_LENGTH = 30; 
@@ -80,9 +83,9 @@ public class TronGUI extends JFrame {
         });
 
         gameTimer = new Timer(50, (ActionEvent e) -> gameLoop());
-        gameTimer.start();
-        
-        showStory(1);
+        storyManager = new StoryManager(this);
+        this.setGlassPane(storyManager); 
+        storyManager.startIntro();
     }
     
     private void fireDisc() {
@@ -409,6 +412,11 @@ public class TronGUI extends JFrame {
         gamePanel.repaint();
     }
     
+    public void resumeGame() {
+        if (gameTimer != null) gameTimer.start();
+        this.requestFocusInWindow(); // Gives keyboard control back to player
+    }
+    
     private class GamePanel extends JPanel {
         @Override
         protected void paintComponent(Graphics g) {
@@ -478,6 +486,7 @@ else {
     else g.setColor(TRON_BODY);
     g.fillRect(px, py, CELL_SIZE, CELL_SIZE);
 }
+
         }
     }
 }
