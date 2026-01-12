@@ -53,7 +53,7 @@ public class StoryManager extends JPanel {
         else if (sceneStep == 1) {
             // 2. NARRATIVE TEXT
             // You can use a static background image here
-            setImage("imageIII.jpeg"); 
+            setImage("imageIII.jpg"); 
             currentText = "The Grid. A digital frontier..."; // The text you requested
         } 
         else if (sceneStep == 2) {
@@ -117,3 +117,4 @@ public class StoryManager extends JPanel {
         g.drawString("[CLICK TO CONTINUE]", getWidth() - 150, getHeight() - 20);
     }
 }
+
