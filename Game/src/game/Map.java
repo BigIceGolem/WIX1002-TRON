@@ -37,6 +37,10 @@ public class Map {
         return r >= 0 && r < rows && c >= 0 && c < cols;
     }
 
-    public int getRows() { return rows; }
-    public int getCols() { return cols; }
+    public int getRows() { 
+        return rows; 
+    }
+    public int getCols() { 
+        return cols; 
+    }
 }
